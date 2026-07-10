@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  
+  /* Global Typography Settings */
+  body, input, select, textarea, button, text {
+    font-family: Consolas, "Courier New", monospace !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  body {
+    background-color: #121212;
+    color: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Premium Dark Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #121212;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2D2D2D;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3D3D3D;
+  }
+}
+
+/* Custom Utility Classes for Enterprise SaaS Dark Theme */
+.bg-dark-bg {
+  background-color: #121212;
+}
+
+.bg-dark-sidebar {
+  background-color: #1A1A1A;
+}
+
+.bg-dark-card {
+  background-color: #222222;
+}
+
+.border-dark-border {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.text-dark-primary {
+  color: #FFFFFF;
+}
+
+.text-dark-secondary {
+  color: #B3B3B3;
+}
+
+.text-brand-blue {
+  color: #4F8CFF;
+}
+
+.bg-brand-blue {
+  background-color: #4F8CFF;
+}
+
+.border-brand-blue {
+  border-color: #4F8CFF;
+}

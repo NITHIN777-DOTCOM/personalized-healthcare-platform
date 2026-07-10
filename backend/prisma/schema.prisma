@@ -1,0 +1,100 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // "PATIENT", "DOCTOR", "ADMIN"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile data
+  patientProfile PatientProfile?
+  doctorProfile  DoctorProfile?
+
+  // Relations
+  appointmentsAsPatient     Appointment[] @relation("PatientAppointments")
+  appointmentsAsDoctor      Appointment[] @relation("DoctorAppointments")
+  recommendationsAsDoctor   Recommendation[] @relation("DoctorRecommendations")
+  recommendationsAsPatient  Recommendation[] @relation("PatientRecommendations")
+  healthMetrics             HealthMetric[]
+
+  @@map("users")
+}
+
+model PatientProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth    String?
+  gender         String?
+  bloodType      String?
+  height         Float?   // in cm
+  weight         Float?   // in kg
+  allergies      String?  // text
+  medicalHistory String?  // text
+
+  @@map("patient_profiles")
+}
+
+model DoctorProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization  String
+  licenseNumber   String
+  consultationFee Float    @default(0)
+  bio             String?
+
+  @@map("doctor_profiles")
+}
+
+model Appointment {
+  id           String   @id @default(uuid())
+  patientId    String
+  patient      User     @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId     String
+  doctor       User     @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
+  dateTime     DateTime
+  status       String   // "PENDING", "APPROVED", "COMPLETED", "CANCELLED"
+  reason       String?  // reason for visit
+  notes        String?  // doctor's notes / diagnosis
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("appointments")
+}
+
+model HealthMetric {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type        String   // "BLOOD_PRESSURE", "HEART_RATE", "BLOOD_SUGAR", "WEIGHT", "STEPS", "SLEEP"
+  value       String   // e.g. "120/80", "72", "95", "70", "8000", "7.5"
+  unit        String   // e.g. "mmHg", "bpm", "mg/dL", "kg", "steps", "hours"
+  recordedAt  DateTime @default(now())
+
+  @@map("health_metrics")
+}
+
+model Recommendation {
+  id          String   @id @default(uuid())
+  doctorId    String
+  doctor      User     @relation("DoctorRecommendations", fields: [doctorId], references: [id], onDelete: Cascade)
+  patientId   String
+  patient     User     @relation("PatientRecommendations", fields: [patientId], references: [id], onDelete: Cascade)
+  title       String   // e.g. "Diet Plan", "Exercise Routine", "Medication Plan"
+  description String   // detailed description
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("recommendations")
+}
