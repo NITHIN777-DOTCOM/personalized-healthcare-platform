@@ -161,3 +161,62 @@ export const deleteRecommendation = async (
     next(error);
   }
 };
+
+// @desc    Generate AI recommendation based on patient's latest vitals
+// @route   POST /api/recommendations/generate
+// @access  Private (Doctor)
+export const generateAIRecommendation = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized.' });
+      return;
+    }
+
+    const { patientId } = req.body;
+    if (!patientId) {
+      res.status(400).json({ success: false, message: 'Patient ID is required.' });
+      return;
+    }
+
+    // Retrieve latest vitals of the patient
+    const [stepsMetric, sleepMetric, bpMetric] = await Promise.all([
+      prisma.healthMetric.findFirst({
+        where: { patientId, type: 'STEPS' },
+        orderBy: { recordedAt: 'desc' }
+      }),
+      prisma.healthMetric.findFirst({
+        where: { patientId, type: 'SLEEP' },
+        orderBy: { recordedAt: 'desc' }
+      }),
+      prisma.healthMetric.findFirst({
+        where: { patientId, type: 'BLOOD_PRESSURE' },
+        orderBy: { recordedAt: 'desc' }
+      })
+    ]);
+
+    const vitals = {
+      steps: stepsMetric?.value || '0',
+      sleep: sleepMetric?.value || '0',
+      bloodPressure: bpMetric?.value || ''
+    };
+
+    // Use AI Provider (abstracted factory selects Local or Azure OpenAI dynamically)
+    const { aiProvider } = await import('../providers');
+    const advice = await aiProvider.generateRecommendations(vitals);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        patientId,
+        title: 'AI Diagnostic Advice',
+        description: advice
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
