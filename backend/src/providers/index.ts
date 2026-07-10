@@ -17,25 +17,82 @@ import { AzureBlobStorageProvider } from './storage/AzureBlobStorageProvider';
 // Utility helper to evaluate boolean feature flags
 const isTrue = (val: any) => String(val).toLowerCase() === 'true';
 
-// 1. Secret Provider Selection
-export const secretProvider: SecretProvider = isTrue(process.env.USE_AZURE_KEYVAULT)
-  ? new AzureKeyVaultSecretProvider()
-  : new LocalSecretProvider();
+// Lazy Cache instances
+let _secretProvider: SecretProvider | null = null;
+let _aiProvider: AIProvider | null = null;
+let _appLogger: AppLogger | null = null;
+let _storageProvider: StorageProvider | null = null;
 
-// 2. AI Provider Selection
-export const aiProvider: AIProvider = isTrue(process.env.USE_AZURE_AI)
-  ? new AzureLanguageRecommendationProvider()
-  : new LocalRecommendationProvider();
+// Explicit getters
+export const getSecretProvider = (): SecretProvider => {
+  if (!_secretProvider) {
+    _secretProvider = isTrue(process.env.USE_AZURE_KEYVAULT)
+      ? new AzureKeyVaultSecretProvider()
+      : new LocalSecretProvider();
+  }
+  return _secretProvider;
+};
 
-// 3. Logger Provider Selection
-export const appLogger: AppLogger = isTrue(process.env.USE_AZURE_MONITOR)
-  ? new AzureMonitorLogger()
-  : new LocalLogger();
+export const getAIProvider = (): AIProvider => {
+  if (!_aiProvider) {
+    _aiProvider = isTrue(process.env.USE_AZURE_AI)
+      ? new AzureLanguageRecommendationProvider()
+      : new LocalRecommendationProvider();
+  }
+  return _aiProvider;
+};
 
-// 4. Storage Provider Selection
-export const storageProvider: StorageProvider = isTrue(process.env.USE_AZURE_STORAGE)
-  ? new AzureBlobStorageProvider()
-  : new LocalStorageProvider();
+export const getAppLogger = (): AppLogger => {
+  if (!_appLogger) {
+    _appLogger = isTrue(process.env.USE_AZURE_MONITOR)
+      ? new AzureMonitorLogger()
+      : new LocalLogger();
+  }
+  return _appLogger;
+};
+
+export const getStorageProvider = (): StorageProvider => {
+  if (!_storageProvider) {
+    _storageProvider = isTrue(process.env.USE_AZURE_STORAGE)
+      ? new AzureBlobStorageProvider()
+      : new LocalStorageProvider();
+  }
+  return _storageProvider;
+};
+
+// Exported Proxies to preserve structural compatibility and prevent import-time execution
+export const secretProvider = new Proxy({} as SecretProvider, {
+  get: (_, prop) => {
+    const instance = getSecretProvider() as any;
+    const value = instance[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
+export const aiProvider = new Proxy({} as AIProvider, {
+  get: (_, prop) => {
+    const instance = getAIProvider() as any;
+    const value = instance[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
+export const appLogger = new Proxy({} as AppLogger, {
+  get: (_, prop) => {
+    const instance = getAppLogger() as any;
+    const value = instance[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
+export const storageProvider = new Proxy({} as StorageProvider, {
+  get: (_, prop) => {
+    const instance = getStorageProvider() as any;
+    const value = instance[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
 export default {
   secretProvider,
   aiProvider,

@@ -1,5 +1,5 @@
 import { AppLogger } from './AppLogger';
-import logger from '../../utils/logger';
+import { baseLogger } from '../../utils/logger';
 
 export class AzureMonitorLogger implements AppLogger {
   private telemetryClient: any = null;
@@ -29,21 +29,21 @@ export class AzureMonitorLogger implements AppLogger {
   }
 
   info(msg: string, ...args: any[]): void {
-    logger.info(msg, ...args);
+    baseLogger.info(msg, ...args);
     if (this.telemetryClient) {
       this.telemetryClient.trackTrace({ message: msg, severity: 1 });
     }
   }
 
   warn(msg: string, ...args: any[]): void {
-    logger.warn(msg, ...args);
+    baseLogger.warn(msg, ...args);
     if (this.telemetryClient) {
       this.telemetryClient.trackTrace({ message: msg, severity: 2 });
     }
   }
 
   error(err: any, msg?: string, ...args: any[]): void {
-    logger.error(err, msg, ...args);
+    baseLogger.error(err, msg, ...args);
     if (this.telemetryClient) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       this.telemetryClient.trackException({ exception: errorObj, properties: { message: msg || '' } });
@@ -51,10 +51,11 @@ export class AzureMonitorLogger implements AppLogger {
   }
 
   fatal(err: any, msg?: string, ...args: any[]): void {
-    logger.fatal(err, msg, ...args);
+    baseLogger.fatal(err, msg, ...args);
     if (this.telemetryClient) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       this.telemetryClient.trackException({ exception: errorObj, properties: { message: msg || '', fatal: 'true' } });
     }
   }
 }
+export default AzureMonitorLogger;

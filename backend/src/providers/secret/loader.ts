@@ -1,7 +1,13 @@
+import dotenv from 'dotenv';
 import { secretProvider } from '../index';
 
 export const initializeSecrets = async () => {
   const isTrue = (val: any) => String(val).toLowerCase() === 'true';
+
+  // Load local environmental variables before checking any Azure parameters
+  if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+  }
 
   // 1. Immediately return if USE_AZURE_KEYVAULT is false
   if (!isTrue(process.env.USE_AZURE_KEYVAULT)) {
