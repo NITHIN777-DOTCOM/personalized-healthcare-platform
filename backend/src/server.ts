@@ -2,7 +2,11 @@ import { initializeSecrets } from './providers/secret/loader';
 
 async function startServer() {
   // 1. Asynchronously pre-fetch secrets from Azure Key Vault if USE_AZURE_KEYVAULT is true
+  try {
   await initializeSecrets();
+} catch (err) {
+  console.warn("Azure Key Vault unavailable. Falling back to .env.");
+}
 
   // 2. Dynamically import modules after environment variables are successfully loaded and injected
   const app = (await import('./app')).default;
