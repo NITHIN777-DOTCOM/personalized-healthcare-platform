@@ -13,8 +13,9 @@ const app = express();
 app.use(helmet());
 
 // Cross-Origin Requests Setup
+const allowedOrigin = config.FRONTEND_URL.replace(/\/$/, '');
 app.use(cors({
-  origin: config.FRONTEND_URL,
+  origin: allowedOrigin,
   credentials: true,
 }));
 

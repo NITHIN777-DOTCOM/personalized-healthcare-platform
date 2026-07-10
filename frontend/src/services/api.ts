@@ -1,7 +1,17 @@
 import axios from 'axios';
 
-// Load base API URL from Vite environment variables, falling back to local port 5000 gateway
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Get base API URL from environment variables, defaulting to local port 5000 gateway
+let API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// Ensure the baseURL always has the /api suffix to route requests correctly
+if (API_BASE_URL) {
+  const cleanUrl = API_BASE_URL.replace(/\/$/, ''); // Strip trailing slash
+  if (!cleanUrl.endsWith('/api')) {
+    API_BASE_URL = `${cleanUrl}/api`;
+  } else {
+    API_BASE_URL = cleanUrl;
+  }
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
