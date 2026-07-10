@@ -1,3 +1,4 @@
+/// <reference path="../../types/azure.d.ts" />
 import { SecretProvider } from './SecretProvider';
 
 export class AzureKeyVaultSecretProvider implements SecretProvider {

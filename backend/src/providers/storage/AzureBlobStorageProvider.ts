@@ -1,3 +1,4 @@
+/// <reference path="../../types/azure.d.ts" />
 import { StorageProvider } from './StorageProvider';
 import path from 'path';
 

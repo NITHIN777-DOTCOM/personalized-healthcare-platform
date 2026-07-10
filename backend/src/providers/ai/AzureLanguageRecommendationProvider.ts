@@ -1,3 +1,4 @@
+/// <reference path="../../types/azure.d.ts" />
 import { AIProvider } from './AIProvider';
 
 export class AzureLanguageRecommendationProvider implements AIProvider {

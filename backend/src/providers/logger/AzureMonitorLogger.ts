@@ -1,3 +1,4 @@
+/// <reference path="../../types/azure.d.ts" />
 import { AppLogger } from './AppLogger';
 import { baseLogger } from '../../utils/logger';
 
