@@ -1,34 +1,19 @@
-# 🏥 PulseCare: Enterprise-Grade Personalized Healthcare & Wellness Platform
+# PulseCare
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Azure](https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
+PulseCare is a full-stack health and wellness platform built with Node.js/Express and React. It implements role-based access control for patients, doctors, and administrators, allowing users to log biometrics, schedule appointments, and receive automated diagnostic recommendations. By default, the application runs locally using a SQLite database managed via Prisma. It contains optional Microsoft Azure integration points (Key Vault, OpenAI, Blob Storage, Application Insights) that are wired using runtime feature flags and run in simulation/fallback mode locally when the cloud credentials or SDKs are not present.
 
-PulseCare is a secure, role-based, full-stack digital health and wellness platform designed with **Clean Architecture** and **SOLID principles**. It provides patients, clinicians, and administrators with real-time biometric metrics tracking, appointment scheduling, and automated AI diagnostic recommendations.
+## Architecture
 
-The platform is designed to run locally on a lightweight **SQLite database** by default, while exposing optional cloud-ready **Microsoft Azure** integration points (Key Vault, OpenAI, Blob Storage, Application Insights) that can be toggled on instantly via configuration.
+This project follows Clean Architecture and SOLID design principles. Core business logic is decoupled from frameworks, databases, and third-party SDKs, allowing individual parts of the system to be developed and tested in isolation.
 
----
+To manage cloud resources, the application uses Dependency Inversion combined with ES6 Proxy-wrapped Lazy Factories. Instead of importing Azure SDKs directly, providers are dynamically resolved at runtime based on environment configuration flags. This approach prevents the local environment from crashing if Azure credentials are missing or if the Azure SDK packages are not installed, since dependencies are loaded dynamically only when the respective service is enabled.
 
-## 🎨 Professional Design System & UI/UX
+### Implementation Status
+* **Local Path**: Fully implemented and functional. Vitals logging, appointments scheduling, and recommendation history work end-to-end using Prisma and SQLite. Logging defaults to a local console stream via Pino, files are stored on the local disk, and recommendation generation runs on a local rule-based fallback provider. Authentication uses JWT with bcrypt password hashing.
+* **Azure Integration**: Implemented as toggleable runtime stubs. The code is structured to dynamically load `@azure` SDKs or execute HTTP fallback requests when flags are enabled, but these integrations have not been run or tested in a production environment.
+* **Testing**: Currently, no unit or integration tests are implemented; the test configuration scripts are in place but are set to pass on empty runs.
 
-*   **Dark Mode by Default**: Enterprise SaaS dashboard layout featuring cohesive medical dark styling (Background `#121212`, Cards `#222222`, Accents in brand blue `#4F8CFF` and success green `#4ADE80`).
-*   **Three-Way Theme Selector**: Instantly cycle between **Light Mode** (Amber Sun), **Dark Mode** (Brand Blue Moon), and **System Preferences** (Purple Monitor).
-*   **Monospace Typography**: Styled globally in **Consolas** with a custom tracking scale (`+0.04em` letter-spacing) for high-readability telemetry, tables, and charts.
-*   **Interactive Visual Analytics**: Interactive Area and Bar charts utilizing Recharts, dynamically matching the selected theme.
-
----
-
-## 🏗️ System Architecture & Abstraction Layers
-
-PulseCare implements **Dependency Inversion** to keep core business logic decoupled from external SDK libraries. Every cloud resource is accessed through abstraction interfaces and resolved at runtime via **ES6 Proxy-wrapped Lazy Factories**. This eliminates circular module deadlocks and prevents local startups from crashing if Azure SDKs are not installed:
-
+### Lazy Factory Provider Resolution
 ```mermaid
 graph TD
     A["Express App (App/Server)"] --> B["Provider Factory (providers/index.ts)"]
@@ -50,11 +35,14 @@ graph TD
     F -->|Azure| F2["AzureBlobStorageProvider (Blobs)"]
 ```
 
----
+## Tech Stack
+* **Frontend**: React 18, Vite, TypeScript, Recharts (theme-linked charts), Framer Motion (page transitions), React Hook Form, Axios, React Router.
+* **Backend**: Node.js, Express, TypeScript, Prisma, Pino (logging), Zod (input validation), JSON Web Tokens (JWT) for authentication, and bcrypt for password hashing.
+* **Database**: SQLite (managed via Prisma).
+* **UI styling**: Tailwind CSS and custom theme configurations supporting light mode, dark mode (default), and system preference matching.
 
-## 🗄️ Relational Database Schema (SQLite via Prisma)
-
-The database schema manages user roles, clinical profiles, biometric logs, and recommendations:
+## Database Schema
+The database uses SQLite, which was chosen to simplify local setup and avoid the overhead of running a separate database server during development. The tables are mapped via Prisma as follows:
 
 ```mermaid
 erDiagram
@@ -119,66 +107,53 @@ erDiagram
     }
 ```
 
----
-
-## 🚀 Getting Started (Local Setup)
-
-Install dependencies and start the local environment in seconds using mono-repo root commands.
-
+## Setup and Local Run
 ### Prerequisites
-*   [Node.js](https://nodejs.org/) (v20.x or higher)
-*   [npm](https://www.npmjs.com/) (v10.x or higher)
+* Node.js (v20.x or higher)
+* npm (v10.x or higher)
 
-### Setup & Run
-1.  **Clone the repository and install all dependencies**:
-    ```bash
-    npm install
-    ```
-2.  **Synchronize and seed the SQLite database**:
-    ```bash
-    npx prisma db push
-    ```
-    *This generates the Prisma client and provisions the database with 1 Admin, 2 Doctors, 5 Patients, and historical health records.*
-3.  **Launch the development server**:
-    ```bash
-    npm run dev
-    ```
-    *   Backend API: http://localhost:5000/api
-    *   React Client: http://localhost:3000
+### Installation
+1. Install dependencies at the monorepo root:
+   ```bash
+   npm install
+   ```
+2. Set up and seed the SQLite database:
+   ```bash
+   npx prisma db push
+   ```
+   This generates the Prisma client and seeds the database with 1 Admin user, 2 Doctor profiles, 5 Patient profiles, and mock health metrics history.
+3. Start the development servers:
+   ```bash
+   npm run dev
+   ```
+   * Backend API: `http://localhost:5000/api`
+   * React Client: `http://localhost:3000`
 
----
+## Production Deployment
+### Backend (Render Web Service)
+* **Build Command**: `npm run build`
+* **Start Command**: `npm run start`
+* **Required Environment Variables**:
+  ```env
+  PORT=5000
+  NODE_ENV=production
+  DATABASE_URL="file:./dev.db"
+  FRONTEND_URL="https://your-frontend-app.vercel.app"
+  JWT_ACCESS_SECRET="your-access-secret-token"
+  JWT_REFRESH_SECRET="your-refresh-secret-token"
+  ```
+* **Persistent Disk**: Configure a persistent disk mount at `/backend/prisma/` to prevent loss of the `dev.db` database file on redeployment.
 
-## 🌐 Production Deployment Configurations
+### Frontend (Vercel SPA)
+* **Build Command**: `npm run build`
+* **Output Directory**: `dist`
+* **Required Environment Variables**:
+  ```env
+  VITE_API_URL="https://your-backend-app.onrender.com/api"
+  ```
 
-PulseCare is optimized for hosting on **Render** (Backend) and **Vercel** (Frontend).
-
-### 1. Backend Config (Render Web Service)
-*   **Build Command**: `npm run build`
-*   **Start Command**: `npm run start`
-*   **Environment Variables**:
-    ```env
-    PORT=5000
-    NODE_ENV=production
-    DATABASE_URL="file:./dev.db"
-    FRONTEND_URL="https://your-frontend-app.vercel.app"
-    JWT_ACCESS_SECRET="your-access-secret-token"
-    JWT_REFRESH_SECRET="your-refresh-secret-token"
-    ```
-*   *Note: Set up a disk mount point on Render at `/backend/prisma/` to ensure your database file (`dev.db`) is preserved across deployments.*
-
-### 2. Frontend Config (Vercel SPA)
-*   **Build Command**: `npm run build`
-*   **Output Directory**: `dist`
-*   **Environment Variables**:
-    ```env
-    VITE_API_URL="https://your-backend-app.onrender.com/api"
-    ```
-
----
-
-## ☁️ Activating Azure Integrations (Optional)
-
-When deploying to Azure, toggle on specific services by adding feature flags to your environment settings:
+## Optional Cloud Configurations
+To test or configure Azure integration options locally or in production, add the following feature flags and variables to your environment configuration:
 
 ```env
 # 1. Key Vault (Secure Credentials)
