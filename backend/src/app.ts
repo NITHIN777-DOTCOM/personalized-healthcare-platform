@@ -15,7 +15,21 @@ app.use(helmet());
 // Cross-Origin Requests Setup
 const allowedOrigin = config.FRONTEND_URL.replace(/\/$/, '');
 app.use(cors({
-  origin: allowedOrigin,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (
+      normalizedOrigin === allowedOrigin ||
+      normalizedOrigin.endsWith('.vercel.app') ||
+      normalizedOrigin.startsWith('http://localhost:') ||
+      process.env.NODE_ENV !== 'production'
+    ) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 

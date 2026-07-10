@@ -24,9 +24,9 @@ if (process.env.DATABASE_URL.startsWith('file:')) {
 const configSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string(),
-  JWT_ACCESS_SECRET: z.string().min(8),
-  JWT_REFRESH_SECRET: z.string().min(8),
+  DATABASE_URL: z.string().default('file:./dev.db'),
+  JWT_ACCESS_SECRET: z.string().default('fallback-access-token-secret-key-1234567890-very-long'),
+  JWT_REFRESH_SECRET: z.string().default('fallback-refresh-token-secret-key-1234567890-very-long'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
