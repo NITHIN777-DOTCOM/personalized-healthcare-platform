@@ -2,9 +2,10 @@ import dotenv from 'dotenv';
 import z from 'zod';
 import path from 'path';
 
-// Load environmental variables
-const envPath = path.join(__dirname, '../../.env');
-dotenv.config({ path: envPath });
+// Only load .env automatically during local development/testing
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 // Normalize SQLite DATABASE_URL to be absolute to avoid CWD resolution issues
 if (!process.env.DATABASE_URL) {
